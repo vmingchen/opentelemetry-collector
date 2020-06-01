@@ -26,6 +26,7 @@ import (
 	"go.opentelemetry.io/collector/exporter/otlpexporter"
 	"go.opentelemetry.io/collector/exporter/prometheusexporter"
 	"go.opentelemetry.io/collector/exporter/zipkinexporter"
+	"go.opentelemetry.io/collector/extension/dynamicconfigextension"
 	"go.opentelemetry.io/collector/extension/healthcheckextension"
 	"go.opentelemetry.io/collector/extension/pprofextension"
 	"go.opentelemetry.io/collector/extension/zpagesextension"
@@ -55,6 +56,7 @@ func Components() (
 	errs := []error{}
 
 	extensions, err := component.MakeExtensionFactoryMap(
+		&dynamicconfigextension.Factory{},
 		&healthcheckextension.Factory{},
 		&pprofextension.Factory{},
 		&zpagesextension.Factory{},
