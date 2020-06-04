@@ -30,6 +30,7 @@ import (
 	"go.opentelemetry.io/collector/exporter/otlpexporter"
 	"go.opentelemetry.io/collector/exporter/prometheusexporter"
 	"go.opentelemetry.io/collector/exporter/zipkinexporter"
+	"go.opentelemetry.io/collector/extension/dynamicconfigextension"
 	"go.opentelemetry.io/collector/extension/healthcheckextension"
 	"go.opentelemetry.io/collector/extension/pprofextension"
 	"go.opentelemetry.io/collector/extension/zpagesextension"
@@ -52,9 +53,10 @@ import (
 
 func TestDefaultComponents(t *testing.T) {
 	expectedExtensions := map[configmodels.Type]component.ExtensionFactory{
-		"health_check": &healthcheckextension.Factory{},
-		"pprof":        &pprofextension.Factory{},
-		"zpages":       &zpagesextension.Factory{},
+		"dynamicconfig": &dynamicconfigextension.Factory{},
+		"health_check":  &healthcheckextension.Factory{},
+		"pprof":         &pprofextension.Factory{},
+		"zpages":        &zpagesextension.Factory{},
 	}
 	expectedReceivers := map[configmodels.Type]component.ReceiverFactoryBase{
 		"jaeger":      &jaegerreceiver.Factory{},
