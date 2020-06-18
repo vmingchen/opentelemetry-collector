@@ -54,11 +54,13 @@ all: checklicense impi lint misspell test otelcol
 
 .PHONY: testbed-runtests
 testbed-runtests: otelcol
+	cd ./testbed/correctness && ./runtests.sh
 	cd ./testbed/tests && ./runtests.sh
 
 .PHONY: testbed-listtests
 testbed-listtests:
-	TESTBED_CONFIG=local.yaml $(GOTEST) -v ./testbed/tests --test.list '.*'|head -n -1
+	TESTBED_CONFIG=inprocess.yaml $(GOTEST) -v ./testbed/correctness --test.list '.*'|head -n 10
+	TESTBED_CONFIG=local.yaml $(GOTEST) -v ./testbed/tests --test.list '.*'|head -n 20
 
 .PHONY: test
 test:
@@ -162,6 +164,18 @@ check-component:
 ifndef COMPONENT
 	$(error COMPONENT variable was not defined)
 endif
+
+.PHONY: add-tag
+add-tag:
+	@[ "${TAG}" ] || ( echo ">> env var TAG is not set"; exit 1 )
+	@echo "Adding tag ${TAG}"
+	@git tag -a ${TAG} -s -m "Version ${TAG}"
+
+.PHONY: delete-tag
+delete-tag:
+	@[ "${TAG}" ] || ( echo ">> env var TAG is not set"; exit 1 )
+	@echo "Deleting tag ${TAG}"
+	@git tag -d ${TAG}
 
 .PHONY: docker-otelcol
 docker-otelcol:
