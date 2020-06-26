@@ -12,18 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package componenttest
+// +build !windows
 
-import (
-	"errors"
-	"testing"
+package main
 
-	"github.com/stretchr/testify/require"
-)
+import "go.opentelemetry.io/collector/service"
 
-func TestNewNopHost(t *testing.T) {
-	got := NewNopHost()
-	require.IsType(t, &NopHost{}, got)
-
-	got.ReportFatalError(errors.New("TestError"))
+func run(params service.Parameters) error {
+	return runInteractive(params)
 }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package configgrpc
+package confighttp
 
 import (
 	"testing"
@@ -22,29 +22,15 @@ import (
 	"go.opentelemetry.io/collector/config/configtls"
 )
 
-func TestBasicGrpcSettings(t *testing.T) {
-	gcs := &GRPCClientSettings{
-		Headers:     nil,
-		Endpoint:    "",
-		Compression: "",
-		Keepalive:   nil,
-	}
-	_, err := gcs.ToDialOptions()
-
-	assert.NoError(t, err)
-}
-
 func TestInvalidPemFile(t *testing.T) {
 	tests := []struct {
-		settings GRPCClientSettings
+		settings HTTPClientSettings
 		err      string
 	}{
 		{
 			err: "^failed to load TLS config: failed to load CA CertPool: failed to load CA /doesnt/exist:",
-			settings: GRPCClientSettings{
-				Headers:     nil,
-				Endpoint:    "",
-				Compression: "",
+			settings: HTTPClientSettings{
+				Endpoint: "",
 				TLSSetting: configtls.TLSClientSetting{
 					TLSSetting: configtls.TLSSetting{
 						CAFile: "/doesnt/exist",
@@ -52,15 +38,12 @@ func TestInvalidPemFile(t *testing.T) {
 					Insecure:   false,
 					ServerName: "",
 				},
-				Keepalive: nil,
 			},
 		},
 		{
 			err: "^failed to load TLS config: for auth via TLS, either both certificate and key must be supplied, or neither",
-			settings: GRPCClientSettings{
-				Headers:     nil,
-				Endpoint:    "",
-				Compression: "",
+			settings: HTTPClientSettings{
+				Endpoint: "",
 				TLSSetting: configtls.TLSClientSetting{
 					TLSSetting: configtls.TLSSetting{
 						CertFile: "/doesnt/exist",
@@ -68,41 +51,13 @@ func TestInvalidPemFile(t *testing.T) {
 					Insecure:   false,
 					ServerName: "",
 				},
-				Keepalive: nil,
 			},
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.err, func(t *testing.T) {
-			_, err := test.settings.ToDialOptions()
+			_, err := test.settings.ToClient()
 			assert.Regexp(t, test.err, err)
 		})
-	}
-}
-
-func TestUseSecure(t *testing.T) {
-	gcs := &GRPCClientSettings{
-		Headers:     nil,
-		Endpoint:    "",
-		Compression: "",
-		TLSSetting:  configtls.TLSClientSetting{},
-		Keepalive:   nil,
-	}
-	dialOpts, err := gcs.ToDialOptions()
-	assert.NoError(t, err)
-	assert.Equal(t, len(dialOpts), 1)
-}
-
-func TestGetGRPCCompressionKey(t *testing.T) {
-	if GetGRPCCompressionKey("gzip") != CompressionGzip {
-		t.Error("gzip is marked as supported but returned unsupported")
-	}
-
-	if GetGRPCCompressionKey("Gzip") != CompressionGzip {
-		t.Error("Capitalization of CompressionGzip should not matter")
-	}
-
-	if GetGRPCCompressionKey("badType") != CompressionUnsupported {
-		t.Error("badType is not supported but was returned as supported")
 	}
 }
