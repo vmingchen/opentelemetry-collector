@@ -20,13 +20,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/keepalive"
 
-	"go.opentelemetry.io/collector/config/configprotocol"
 	"go.opentelemetry.io/collector/config/configtls"
 )
 
@@ -73,6 +71,14 @@ type GRPCClientSettings struct {
 	// (https://godoc.org/google.golang.org/grpc#WithKeepaliveParams).
 	Keepalive *KeepaliveClientConfig `mapstructure:"keepalive"`
 
+	// The WriteBufferSize for client gRPC. See grpc.WithReadBufferSize
+	// (https://godoc.org/google.golang.org/grpc#WithReadBufferSize).
+	ReadBufferSize int `mapstructure:"read_buffer_size"`
+
+	// The WriteBufferSize for client gRPC. See grpc.WithWriteBufferSize
+	// (https://godoc.org/google.golang.org/grpc#WithWriteBufferSize).
+	WriteBufferSize int `mapstructure:"write_buffer_size"`
+
 	// WaitForReady parameter configures client to wait for ready state before sending data.
 	// (https://github.com/grpc/grpc/blob/master/doc/wait-for-ready.md)
 	WaitForReady bool `mapstructure:"wait_for_ready"`
@@ -103,8 +109,14 @@ type KeepaliveEnforcementPolicy struct {
 }
 
 type GRPCServerSettings struct {
-	// Configures the generic server protocol.
-	configprotocol.ProtocolServerSettings `mapstructure:",squash"` // squash ensures fields are correctly decoded in embedded struct
+	// The target to which the exporter is going to send traces or metrics,
+	// using the gRPC protocol. The valid syntax is described at
+	// https://github.com/grpc/grpc/blob/master/doc/naming.md.
+	Endpoint string `mapstructure:"endpoint"`
+
+	// Configures the protocol to use TLS.
+	// The default value is nil, which will cause the protocol to not use TLS.
+	TLSCredentials *configtls.TLSServerSetting `mapstructure:"tls_credentials, omitempty"`
 
 	// MaxRecvMsgSizeMiB sets the maximum size (in MiB) of messages accepted by the server.
 	MaxRecvMsgSizeMiB uint64 `mapstructure:"max_recv_msg_size_mib,omitempty"`
@@ -118,18 +130,18 @@ type GRPCServerSettings struct {
 }
 
 // ToServerOption maps configgrpc.GRPCClientSettings to a slice of dial options for gRPC
-func (settings *GRPCClientSettings) ToDialOptions() ([]grpc.DialOption, error) {
+func (gcs *GRPCClientSettings) ToDialOptions() ([]grpc.DialOption, error) {
 	opts := []grpc.DialOption{}
 
-	if settings.Compression != "" {
-		if compressionKey := GetGRPCCompressionKey(settings.Compression); compressionKey != CompressionUnsupported {
+	if gcs.Compression != "" {
+		if compressionKey := GetGRPCCompressionKey(gcs.Compression); compressionKey != CompressionUnsupported {
 			opts = append(opts, grpc.WithDefaultCallOptions(grpc.UseCompressor(compressionKey)))
 		} else {
-			return nil, fmt.Errorf("unsupported compression type %q", settings.Compression)
+			return nil, fmt.Errorf("unsupported compression type %q", gcs.Compression)
 		}
 	}
 
-	tlsCfg, err := settings.TLSSetting.LoadTLSConfig()
+	tlsCfg, err := gcs.TLSSetting.LoadTLSConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -139,11 +151,19 @@ func (settings *GRPCClientSettings) ToDialOptions() ([]grpc.DialOption, error) {
 	}
 	opts = append(opts, tlsDialOption)
 
-	if settings.Keepalive != nil {
+	if gcs.ReadBufferSize > 0 {
+		opts = append(opts, grpc.WithReadBufferSize(gcs.ReadBufferSize))
+	}
+
+	if gcs.WriteBufferSize > 0 {
+		opts = append(opts, grpc.WithWriteBufferSize(gcs.WriteBufferSize))
+	}
+
+	if gcs.Keepalive != nil {
 		keepAliveOption := grpc.WithKeepaliveParams(keepalive.ClientParameters{
-			Time:                settings.Keepalive.Time,
-			Timeout:             settings.Keepalive.Timeout,
-			PermitWithoutStream: settings.Keepalive.PermitWithoutStream,
+			Time:                gcs.Keepalive.Time,
+			Timeout:             gcs.Keepalive.Timeout,
+			PermitWithoutStream: gcs.Keepalive.PermitWithoutStream,
 		})
 		opts = append(opts, keepAliveOption)
 	}
@@ -158,7 +178,7 @@ func (gss *GRPCServerSettings) ToServerOption() ([]grpc.ServerOption, error) {
 	if gss.TLSCredentials != nil {
 		tlsCfg, err := gss.TLSCredentials.LoadTLSConfig()
 		if err != nil {
-			return nil, errors.Wrap(err, "error initializing TLS Credentials")
+			return nil, err
 		}
 		opts = append(opts, grpc.Creds(credentials.NewTLS(tlsCfg)))
 	}

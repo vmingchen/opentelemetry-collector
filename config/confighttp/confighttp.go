@@ -15,8 +15,12 @@
 package confighttp
 
 import (
+	"crypto/tls"
+	"net"
 	"net/http"
 	"time"
+
+	"github.com/rs/cors"
 
 	"go.opentelemetry.io/collector/config/configtls"
 )
@@ -45,4 +49,45 @@ func (hcs *HTTPClientSettings) ToClient() (*http.Client, error) {
 		Transport: transport,
 		Timeout:   hcs.Timeout,
 	}, nil
+}
+
+type HTTPServerSettings struct {
+	// Endpoint configures the listening address for the server.
+	Endpoint string `mapstructure:"endpoint"`
+
+	// TLSSetting struct exposes TLS client configuration.
+	TLSSetting *configtls.TLSServerSetting `mapstructure:"tls_settings, omitempty"`
+
+	// CorsOrigins are the allowed CORS origins for HTTP/JSON requests to grpc-gateway adapter
+	// for the OTLP receiver. See github.com/rs/cors
+	// An empty list means that CORS is not enabled at all. A wildcard (*) can be
+	// used to match any origin or one or more characters of an origin.
+	CorsOrigins []string `mapstructure:"cors_allowed_origins"`
+}
+
+func (hss *HTTPServerSettings) ToListener() (net.Listener, error) {
+	listener, err := net.Listen("tcp", hss.Endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	if hss.TLSSetting != nil {
+		var tlsCfg *tls.Config
+		tlsCfg, err = hss.TLSSetting.LoadTLSConfig()
+		if err != nil {
+			return nil, err
+		}
+		listener = tls.NewListener(listener, tlsCfg)
+	}
+	return listener, nil
+}
+
+func (hss *HTTPServerSettings) ToServer(handler http.Handler) *http.Server {
+	if len(hss.CorsOrigins) > 0 {
+		co := cors.Options{AllowedOrigins: hss.CorsOrigins}
+		handler = cors.New(co).Handler(handler)
+	}
+	return &http.Server{
+		Handler: handler,
+	}
 }

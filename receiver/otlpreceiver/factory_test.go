@@ -28,9 +28,8 @@ import (
 	"go.opentelemetry.io/collector/config/configcheck"
 	"go.opentelemetry.io/collector/config/configgrpc"
 	"go.opentelemetry.io/collector/config/configmodels"
-	"go.opentelemetry.io/collector/config/configprotocol"
 	"go.opentelemetry.io/collector/exporter/exportertest"
-	"go.opentelemetry.io/collector/testutils"
+	"go.opentelemetry.io/collector/testutil"
 )
 
 func TestCreateDefaultConfig(t *testing.T) {
@@ -45,7 +44,7 @@ func TestCreateReceiver(t *testing.T) {
 	cfg := factory.CreateDefaultConfig()
 
 	config := cfg.(*Config)
-	config.Endpoint = testutils.GetAvailableLocalAddress(t)
+	config.Endpoint = testutil.GetAvailableLocalAddress(t)
 
 	creationParams := component.ReceiverCreateParams{Logger: zap.NewNop()}
 	tReceiver, err := factory.CreateTraceReceiver(context.Background(), creationParams, cfg, nil)
@@ -59,15 +58,13 @@ func TestCreateReceiver(t *testing.T) {
 
 func TestCreateTraceReceiver(t *testing.T) {
 	factory := Factory{}
-	endpoint := testutils.GetAvailableLocalAddress(t)
+	endpoint := testutil.GetAvailableLocalAddress(t)
 	defaultReceiverSettings := configmodels.ReceiverSettings{
 		TypeVal: typeStr,
 		NameVal: typeStr,
 	}
 	defaultGRPCSettings := configgrpc.GRPCServerSettings{
-		ProtocolServerSettings: configprotocol.ProtocolServerSettings{
-			Endpoint: endpoint,
-		},
+		Endpoint: endpoint,
 	}
 
 	tests := []struct {
@@ -91,9 +88,7 @@ func TestCreateTraceReceiver(t *testing.T) {
 					NameVal: typeStr,
 				},
 				GRPCServerSettings: configgrpc.GRPCServerSettings{
-					ProtocolServerSettings: configprotocol.ProtocolServerSettings{
-						Endpoint: "localhost:112233",
-					},
+					Endpoint: "localhost:112233",
 				},
 				Transport: "tcp",
 			},
@@ -104,9 +99,7 @@ func TestCreateTraceReceiver(t *testing.T) {
 			cfg: &Config{
 				ReceiverSettings: defaultReceiverSettings,
 				GRPCServerSettings: configgrpc.GRPCServerSettings{
-					ProtocolServerSettings: configprotocol.ProtocolServerSettings{
-						Endpoint: endpoint,
-					},
+					Endpoint:             endpoint,
 					MaxRecvMsgSizeMiB:    32,
 					MaxConcurrentStreams: 16,
 				},
@@ -134,15 +127,13 @@ func TestCreateTraceReceiver(t *testing.T) {
 
 func TestCreateMetricReceiver(t *testing.T) {
 	factory := Factory{}
-	endpoint := testutils.GetAvailableLocalAddress(t)
+	endpoint := testutil.GetAvailableLocalAddress(t)
 	defaultReceiverSettings := configmodels.ReceiverSettings{
 		TypeVal: typeStr,
 		NameVal: typeStr,
 	}
 	defaultGRPCSettings := configgrpc.GRPCServerSettings{
-		ProtocolServerSettings: configprotocol.ProtocolServerSettings{
-			Endpoint: endpoint,
-		},
+		Endpoint: endpoint,
 	}
 
 	tests := []struct {
@@ -166,9 +157,7 @@ func TestCreateMetricReceiver(t *testing.T) {
 					NameVal: typeStr,
 				},
 				GRPCServerSettings: configgrpc.GRPCServerSettings{
-					ProtocolServerSettings: configprotocol.ProtocolServerSettings{
-						Endpoint: "327.0.0.1:1122",
-					},
+					Endpoint: "327.0.0.1:1122",
 				},
 				Transport: "tcp",
 			},
@@ -179,9 +168,7 @@ func TestCreateMetricReceiver(t *testing.T) {
 			cfg: &Config{
 				ReceiverSettings: defaultReceiverSettings,
 				GRPCServerSettings: configgrpc.GRPCServerSettings{
-					ProtocolServerSettings: configprotocol.ProtocolServerSettings{
-						Endpoint: endpoint,
-					},
+					Endpoint: endpoint,
 					Keepalive: &configgrpc.KeepaliveServerConfig{
 						ServerParameters: &configgrpc.KeepaliveServerParameters{
 							MaxConnectionAge: 60 * time.Second,

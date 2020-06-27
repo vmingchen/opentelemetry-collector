@@ -39,7 +39,7 @@ import (
 	"go.opentelemetry.io/collector/config/configmodels"
 	"go.opentelemetry.io/collector/internal/version"
 	"go.opentelemetry.io/collector/service/defaultcomponents"
-	"go.opentelemetry.io/collector/testutils"
+	"go.opentelemetry.io/collector/testutil"
 )
 
 func TestApplication_Start(t *testing.T) {
@@ -57,7 +57,7 @@ func TestApplication_Start(t *testing.T) {
 	assert.Equal(t, app.rootCmd, app.Command())
 
 	const testPrefix = "a_test"
-	metricsPort := testutils.GetAvailablePort(t)
+	metricsPort := testutil.GetAvailablePort(t)
 	app.rootCmd.SetArgs([]string{
 		"--config=testdata/otelcol-config.yaml",
 		"--metrics-addr=localhost:" + strconv.FormatUint(uint64(metricsPort), 10),
@@ -105,9 +105,9 @@ func (tel *mockAppTelemetry) shutdown() error {
 
 func TestApplication_ReportError(t *testing.T) {
 	// use a mock AppTelemetry struct to return an error on shutdown
-	preservedAppTelemetry := AppTelemetry
-	AppTelemetry = &mockAppTelemetry{}
-	defer func() { AppTelemetry = preservedAppTelemetry }()
+	preservedAppTelemetry := applicationTelemetry
+	applicationTelemetry = &mockAppTelemetry{}
+	defer func() { applicationTelemetry = preservedAppTelemetry }()
 
 	factories, err := defaultcomponents.Components()
 	require.NoError(t, err)
