@@ -53,6 +53,8 @@ func (f *Factory) CreateDefaultConfig() configmodels.Receiver {
 		},
 		GRPCServerSettings: configgrpc.GRPCServerSettings{
 			Endpoint: "0.0.0.0:55678",
+			// We almost write 0 bytes, so no need to tune WriteBufferSize.
+			ReadBufferSize: 512 * 1024,
 		},
 		Transport: "tcp",
 	}
@@ -76,18 +78,14 @@ func (f *Factory) CreateTraceReceiver(
 }
 
 // CreateMetricsReceiver creates a metrics receiver based on provided config.
-func (f *Factory) CreateMetricsReceiver(
-	logger *zap.Logger,
-	cfg configmodels.Receiver,
-	consumer consumer.MetricsConsumerOld,
-) (component.MetricsReceiver, error) {
+func (f *Factory) CreateMetricsReceiver(ctx context.Context, logger *zap.Logger, cfg configmodels.Receiver, nextConsumer consumer.MetricsConsumerOld) (component.MetricsReceiver, error) {
 
 	r, err := f.createReceiver(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	r.metricsConsumer = consumer
+	r.metricsConsumer = nextConsumer
 
 	return r, nil
 }
