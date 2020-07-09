@@ -5,7 +5,7 @@ go 1.14
 require (
 	contrib.go.opencensus.io/exporter/jaeger v0.1.1-0.20190430175949-e8b55949d948
 	contrib.go.opencensus.io/exporter/ocagent v0.6.0
-	contrib.go.opencensus.io/exporter/prometheus v0.1.0
+	contrib.go.opencensus.io/exporter/prometheus v0.2.0
 	github.com/apache/thrift v0.13.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/census-instrumentation/opencensus-proto v0.2.1
@@ -25,7 +25,7 @@ require (
 	github.com/joshdk/go-junit v0.0.0-20200702055522-6efcf4050909
 	github.com/jstemmer/go-junit-report v0.9.1
 	github.com/mjibson/esc v0.2.0
-	github.com/open-telemetry/opentelemetry-proto v0.3.0
+	github.com/open-telemetry/opentelemetry-proto v0.4.0
 	github.com/openzipkin/zipkin-go v0.2.2
 	github.com/orijtech/prometheus-go-metrics-exporter v0.0.5
 	github.com/ory/go-acc v0.2.1
@@ -34,7 +34,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.5.1
 	github.com/prometheus/common v0.10.0
-	github.com/prometheus/procfs v0.0.11
+	github.com/prometheus/procfs v0.1.3
 	github.com/prometheus/prometheus v1.8.2-0.20190924101040-52e0504f83ea
 	github.com/rs/cors v1.7.0
 	github.com/securego/gosec v0.0.0-20200316084457-7da9f46445fd
@@ -51,7 +51,7 @@ require (
 	go.uber.org/zap v1.13.0
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980
-	golang.org/x/text v0.3.2
+	golang.org/x/text v0.3.3
 	golang.org/x/tools v0.0.0-20200707222132-065b96d36cf8 // indirect
 	google.golang.org/genproto v0.0.0-20200513103714-09dca8ec2884
 	google.golang.org/grpc v1.29.1
