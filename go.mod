@@ -14,8 +14,8 @@ require (
 	github.com/gogo/googleapis v1.3.0 // indirect
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e
-	github.com/golang/protobuf v1.3.5
-	github.com/golangci/golangci-lint v1.28.1
+	github.com/golang/protobuf v1.4.2
+	github.com/golangci/golangci-lint v1.31.0
 	github.com/google/addlicense v0.0.0-20200622132530-df58acafd6d5
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/uuid v1.1.1
@@ -42,7 +42,7 @@ require (
 	github.com/soheilhy/cmux v0.1.4
 	github.com/spf13/cast v1.3.1
 	github.com/spf13/cobra v1.0.0
-	github.com/spf13/viper v1.7.0
+	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
 	github.com/tcnksm/ghr v0.13.0
 	github.com/uber/jaeger-lib v2.2.0+incompatible
@@ -52,9 +52,8 @@ require (
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980
 	golang.org/x/text v0.3.3
-	golang.org/x/tools v0.0.0-20200707222132-065b96d36cf8 // indirect
 	google.golang.org/genproto v0.0.0-20200513103714-09dca8ec2884
 	google.golang.org/grpc v1.29.1
 	gopkg.in/yaml.v2 v2.3.0
-	honnef.co/go/tools v0.0.1-2020.1.4
+	honnef.co/go/tools v0.0.1-2020.1.5
 )
